@@ -66,7 +66,7 @@
         }
 
         body {
-            background-color: var(--bg-color);
+            background: var(--bg-color);
             color: var(--text-color);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -95,25 +95,64 @@
             color: var(--text-color);
         }
 
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 1px solid rgba(0,0,0,0.1);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(72, 149, 239, 0.25);
+        }
+
         .btn-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s;
         }
 
         .btn-primary:hover {
             background-color: var(--secondary-color);
             border-color: var(--secondary-color);
+            transform: translateY(-2px);
         }
 
+        .section-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 25px 0 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Flip Card Styles */
         .flip-card {
             perspective: 1000px;
             margin-bottom: 20px;
+            position: relative;
+            height: 200px;
         }
 
         .flip-card-inner {
             position: relative;
             width: 100%;
-            height: 200px;
+            height: 100%;
             transition: transform 0.6s;
             transform-style: preserve-3d;
             border-radius: 12px;
@@ -121,9 +160,66 @@
             background-color: var(--card-bg);
         }
 
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
         .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             background-color: var(--card-bg);
             color: var(--text-color);
+        }
+
+        .flip-card-back {
+            transform: rotateY(180deg);
+            background: var(--bg-color);
+        }
+
+        .flashcard-question {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .flashcard-answer {
+            color: var(--text-color);
+            margin-bottom: 15px;
+            min-height: 60px;
+        }
+
+        /* Circular Flip Button */
+        .flip-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .flip-btn:hover {
+            background-color: var(--primary-color);
+            transform: scale(1.1);
         }
 
         /* Theme Switcher */
@@ -159,19 +255,7 @@
         #natureTheme { background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%); }
         #oceanTheme { background: linear-gradient(135deg, #0288d1 0%, #01579b 100%); }
 
-        /* Additional Interactive Elements */
-        .progress-ring {
-            position: relative;
-            width: 60px;
-            height: 60px;
-        }
-
-        .progress-ring__circle {
-            transition: stroke-dashoffset 0.35s;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
-
+        /* Floating Action Button */
         .floating-btn {
             position: fixed;
             bottom: 80px;
@@ -204,6 +288,41 @@
 
         .floating {
             animation: float 3s ease-in-out infinite;
+        }
+
+        .animate-pop {
+            animation: popIn 0.4s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(72, 149, 239, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(72, 149, 239, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(72, 149, 239, 0); }
+        }
+
+        .no-cards {
+            text-align: center;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .export-btn {
+            transition: all 0.3s;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -241,8 +360,6 @@
             </div>
         </div>
     </div>
-
-
 
     <div class="container mb-5">
         <div class="row justify-content-center" id="generator">
@@ -408,6 +525,8 @@
         </div>
     </div>
 
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Current flashcards data
@@ -423,6 +542,50 @@
         const results = document.getElementById('results');
         const flashcardsContainer = document.getElementById('flashcardsContainer');
         const flashcardsCountBadge = document.getElementById('flashcardsCountBadge');
+
+        // Theme Switching
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove all theme classes
+                document.body.classList.remove('theme-light', 'theme-dark', 'theme-nature', 'theme-ocean');
+                
+                // Add selected theme
+                const theme = this.id.replace('Theme', '');
+                document.body.classList.add(`theme-${theme}`);
+                
+                // Update active button
+                document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Save theme preference
+                localStorage.setItem('selectedTheme', theme);
+            });
+        });
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('selectedTheme') || 'light';
+        document.body.classList.add(`theme-${savedTheme}`);
+        document.getElementById(`${savedTheme}Theme`).classList.add('active');
+
+        // Scroll to top button
+        document.getElementById('scrollToTop').addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Show/hide scroll button based on scroll position
+        window.addEventListener('scroll', function() {
+            const scrollBtn = document.getElementById('scrollToTop');
+            if (window.pageYOffset > 300) {
+                scrollBtn.style.opacity = '1';
+                scrollBtn.style.visibility = 'visible';
+            } else {
+                scrollBtn.style.opacity = '0';
+                scrollBtn.style.visibility = 'hidden';
+            }
+        });
 
         // Input method toggle
         document.querySelectorAll('input[name="input_method"]').forEach(radio => {
@@ -481,55 +644,6 @@
                 spinner.classList.add('d-none');
             }
         });
-          // Theme Switching
-          document.querySelectorAll('.theme-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Remove all theme classes
-                document.body.classList.remove('theme-light', 'theme-dark', 'theme-nature', 'theme-ocean');
-                
-                // Add selected theme
-                const theme = this.id.replace('Theme', '');
-                document.body.classList.add(`theme-${theme}`);
-                
-                // Update active button
-                document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                
-                // Save theme preference
-                localStorage.setItem('selectedTheme', theme);
-            });
-        });
-
-        // Load saved theme
-        const savedTheme = localStorage.getItem('selectedTheme') || 'light';
-        document.body.classList.add(`theme-${savedTheme}`);
-        document.getElementById(`${savedTheme}Theme`).classList.add('active');
-
-        // Scroll to top button
-        document.getElementById('scrollToTop').addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-
-        // Show/hide scroll button based on scroll position
-        window.addEventListener('scroll', function() {
-            const scrollBtn = document.getElementById('scrollToTop');
-            if (window.pageYOffset > 300) {
-                scrollBtn.style.opacity = '1';
-                scrollBtn.style.visibility = 'visible';
-            } else {
-                scrollBtn.style.opacity = '0';
-                scrollBtn.style.visibility = 'hidden';
-            }
-        });
-
-        // Add floating animation to hero elements
-        const heroElements = document.querySelectorAll('.hero-content > *');
-        heroElements.forEach((el, index) => {
-            el.style.animationDelay = `${index * 0.2}s`;
-        });
 
         // Display flashcards with sections
         function displayFlashcards(flashcards) {
@@ -564,7 +678,7 @@
                 sectionHeader.className = 'section-header';
                 sectionHeader.innerHTML = `
                     <span>${section}</span>
-                    <span class="badge-count">${cards.length} cards</span>
+                    <span class="badge bg-light text-dark">${cards.length} cards</span>
                 `;
                 sectionHeader.dataset.section = sectionId;
                 flashcardsContainer.appendChild(sectionHeader);
@@ -588,7 +702,7 @@
                             <div class="flip-card-back">
                                 <div class="flashcard-answer">${card.answer}</div>
                                 <button class="flip-btn">
-                                    <i class="bi-arrow-left"></i>
+                                    <i class="bi bi-arrow-left"></i>
                                 </button>
                             </div>
                         </div>
@@ -597,10 +711,12 @@
                     flashcardsContainer.appendChild(flipCard);
                     
                     // Add flip functionality
-                    const flipBtn = flipCard.querySelector('.flip-btn');
-                    flipBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        flipCard.classList.toggle('flipped');
+                    const flipBtn = flipCard.querySelectorAll('.flip-btn');
+                    flipBtn.forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            flipCard.classList.toggle('flipped');
+                        });
                     });
                     
                     // Also flip on card click
