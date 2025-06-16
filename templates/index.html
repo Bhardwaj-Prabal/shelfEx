@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Flashcard Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .hero-section {
+            background: url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
+            background-size: cover;
+            color: white;
+            padding: 5rem 0;
+            position: relative;
+            border-radius: 0 0 20px 20px;
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(67, 97, 238, 0.85);
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(72, 149, 239, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .flashcard {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--accent-color);
+        }
+        
+        .flashcard:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .flashcard-question {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .flashcard-answer {
+            color: #555;
+            margin-bottom: 15px;
+            min-height: 60px;
+        }
+        
+        .section-header {
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 25px 0 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .badge-count {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .input-group-text {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 10px 0 0 10px !important;
+        }
+        
+        .form-range::-webkit-slider-thumb {
+            background: var(--primary-color);
+        }
+        
+        .form-range::-moz-range-thumb {
+            background: var(--primary-color);
+        }
+        
+        .form-range::-ms-thumb {
+            background: var(--primary-color);
+        }
+        
+        .animate-pop {
+            animation: popIn 0.4s ease-out;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .flip-card {
+            perspective: 1000px;
+            margin-bottom: 20px;
+        }
+        
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: white;
+        }
+        
+        .flip-card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        }
+        
+        .flip-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .flip-btn:hover {
+            background: var(--primary-color);
+            transform: scale(1.1);
+        }
+        
+        .no-cards {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .no-cards img {
+            max-width: 200px;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+        
+        .export-btn {
+            transition: all 0.3s;
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(72, 149, 239, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(72, 149, 239, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(72, 149, 239, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section">
+        <div class="container">
+            <div class="hero-content text-center">
+                <h1 class="display-4 fw-bold mb-3 animate__animated animate__fadeInDown">
+                    <i class="bi bi-lightbulb"></i> Smart Flashcard Generator
+                </h1>
+                <p class="lead mb-4 animate__animated animate__fadeInUp">
+                    Transform any content into beautiful, interactive flashcards for effective learning
+                </p>
+                <div class="d-flex justify-content-center animate__animated animate__fadeInUp animate__delay-1s">
+                    <a href="#generator" class="btn btn-light btn-lg px-4 me-3">
+                        <i class="bi bi-lightning-charge"></i> Get Started
+                    </a>
+                    <a href="#how-it-works" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-question-circle"></i> How It Works
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <div class="row justify-content-center" id="generator">
+            <div class="col-lg-10">
+                <div class="card p-4 mb-4">
+                    <div class="text-center mb-4">
+                        <h2 class="h3 fw-bold text-primary">
+                            <i class="bi bi-magic"></i> Create Your Flashcards
+                        </h2>
+                        <p class="text-muted">Enter your content below and customize your flashcard set</p>
+                    </div>
+
+                    <form id="mainForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Input Method</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="input_method" id="textInput" value="text" checked>
+                                        <label class="form-check-label" for="textInput">Text Input</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="input_method" id="fileUpload" value="file">
+                                        <label class="form-check-label" for="fileUpload">File Upload</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="subject" class="form-label fw-bold">Subject</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-book"></i></span>
+                                    <input type="text" class="form-control" id="subject" name="subject" placeholder="e.g., Biology, History">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3" id="textInputDiv">
+                            <label for="textContent" class="form-label fw-bold">Content</label>
+                            <textarea class="form-control" id="textContent" name="text" rows="8" 
+                                      placeholder="Paste textbook excerpts, lecture notes, or any educational content here..."></textarea>
+                        </div>
+
+                        <div class="mt-3 d-none" id="fileInputDiv">
+                            <label for="fileUpload" class="form-label fw-bold">Upload File</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="fileUpload" name="file" accept=".txt,.pdf">
+                                <button class="btn btn-outline-secondary" type="button"><i class="bi bi-upload"></i></button>
+                            </div>
+                            <div class="form-text">Supports .txt and .pdf files (structure will be preserved)</div>
+                        </div>
+
+                        <div class="row mt-4 g-3">
+                            <div class="col-md-4">
+                                <label for="numFlashcards" class="form-label fw-bold">Flashcards Count</label>
+                                <input type="range" class="form-range" min="5" max="30" value="15" id="numFlashcards" name="num_flashcards">
+                                <div class="text-center mt-2">
+                                    <span class="fw-bold fs-4 text-primary" id="flashcardCount">15</span> 
+                                    <span class="text-muted">flashcards</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="difficulty" class="form-label fw-bold">Difficulty Level</label>
+                                <select class="form-select" id="difficulty" name="difficulty">
+                                    <option value="easy">Easy</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="answerSize" class="form-label fw-bold">Answer Size</label>
+                                <select class="form-select" id="answerSize" name="answer_size">
+                                    <option value="short">Short (1 sentence)</option>
+                                    <option value="medium" selected>Medium (2-3 sentences)</option>
+                                    <option value="long">Long (paragraph)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg pulse-animation">
+                                <span id="submitText">Generate Flashcards</span>
+                                <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="results" class="card p-4 mb-4 d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="h4 mb-0 fw-bold">
+                            <i class="bi bi-collection"></i> Your Flashcards
+                            <span id="flashcardsCountBadge" class="badge bg-primary ms-2">0</span>
+                        </h2>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-primary export-btn" data-format="json">
+                                <i class="bi bi-filetype-json"></i> JSON
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary export-btn" data-format="csv">
+                                <i class="bi bi-filetype-csv"></i> CSV
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary export-btn" data-format="anki">
+                                <i class="bi bi-journal-text"></i> Anki
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Filter Flashcards</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <div class="form-check">
+                                <input class="form-check-input section-filter" type="checkbox" value="all" id="filterAll" checked>
+                                <label class="form-check-label" for="filterAll">All Sections</label>
+                            </div>
+                            <!-- Sections will be added here dynamically -->
+                        </div>
+                    </div>
+
+                    <div id="flashcardsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mb-5" id="how-it-works">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card p-4">
+                    <h2 class="text-center mb-4 fw-bold"><i class="bi bi-question-circle"></i> How It Works</h2>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 h-100">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 d-inline-block">
+                                    <i class="bi bi-input-cursor-text fs-1"></i>
+                                </div>
+                                <h4 class="h5 fw-bold">1. Input Your Content</h4>
+                                <p class="text-muted">Paste text or upload files from textbooks, notes, or articles.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 h-100">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 d-inline-block">
+                                    <i class="bi bi-sliders fs-1"></i>
+                                </div>
+                                <h4 class="h5 fw-bold">2. Customize Settings</h4>
+                                <p class="text-muted">Adjust difficulty, answer length, and number of flashcards.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 h-100">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 d-inline-block">
+                                    <i class="bi bi-lightning-charge fs-1"></i>
+                                </div>
+                                <h4 class="h5 fw-bold">3. Generate & Learn</h4>
+                                <p class="text-muted">Get beautiful flashcards instantly and start studying!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Current flashcards data
+        let currentFlashcards = [];
+        let currentSections = [];
+
+        // DOM elements
+        const mainForm = document.getElementById('mainForm');
+        const textInputDiv = document.getElementById('textInputDiv');
+        const fileInputDiv = document.getElementById('fileInputDiv');
+        const numFlashcards = document.getElementById('numFlashcards');
+        const flashcardCount = document.getElementById('flashcardCount');
+        const results = document.getElementById('results');
+        const flashcardsContainer = document.getElementById('flashcardsContainer');
+        const flashcardsCountBadge = document.getElementById('flashcardsCountBadge');
+
+        // Input method toggle
+        document.querySelectorAll('input[name="input_method"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                textInputDiv.classList.toggle('d-none', radio.value !== 'text');
+                fileInputDiv.classList.toggle('d-none', radio.value !== 'file');
+            });
+        });
+
+        // Update flashcard count display
+        numFlashcards.addEventListener('input', () => {
+            flashcardCount.textContent = numFlashcards.value;
+        });
+
+        // Form submission
+        mainForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitText = document.getElementById('submitText');
+            const spinner = document.getElementById('spinner');
+            
+            submitText.classList.add('d-none');
+            spinner.classList.remove('d-none');
+            
+            const formData = new FormData(mainForm);
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    currentFlashcards = data.flashcards;
+                    currentSections = data.sections;
+                    
+                    displayFlashcards(currentFlashcards);
+                    updateSectionFilters();
+                    results.classList.remove('d-none');
+                    
+                    // Scroll to results
+                    window.scrollTo({
+                        top: results.offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+                console.error(error);
+            } finally {
+                submitText.classList.remove('d-none');
+                spinner.classList.add('d-none');
+            }
+        });
+
+        // Display flashcards with sections
+        function displayFlashcards(flashcards) {
+            flashcardsContainer.innerHTML = '';
+            
+            if (flashcards.length === 0) {
+                flashcardsContainer.innerHTML = `
+                    <div class="no-cards">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No cards">
+                        <h4 class="text-muted">No flashcards generated yet</h4>
+                        <p class="text-muted">Try adjusting your input or settings</p>
+                    </div>
+                `;
+                flashcardsCountBadge.textContent = '0';
+                return;
+            }
+            
+            // Group by section
+            const grouped = {};
+            flashcards.forEach(card => {
+                if (!grouped[card.section]) {
+                    grouped[card.section] = [];
+                }
+                grouped[card.section].push(card);
+            });
+            
+            // Display each section
+            Object.entries(grouped).forEach(([section, cards]) => {
+                const sectionId = section.replace(/\W+/g, '-').toLowerCase();
+                
+                const sectionHeader = document.createElement('div');
+                sectionHeader.className = 'section-header';
+                sectionHeader.innerHTML = `
+                    <span>${section}</span>
+                    <span class="badge-count">${cards.length} cards</span>
+                `;
+                sectionHeader.dataset.section = sectionId;
+                flashcardsContainer.appendChild(sectionHeader);
+                
+                cards.forEach((card, index) => {
+                    const cardId = `${sectionId}-${index}`;
+                    
+                    const flipCard = document.createElement('div');
+                    flipCard.className = 'flip-card';
+                    flipCard.dataset.section = sectionId;
+                    
+                    flipCard.innerHTML = `
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="flashcard-question">${card.question}</div>
+                                <div class="text-muted">Click to flip</div>
+                                <button class="flip-btn">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                            </div>
+                            <div class="flip-card-back">
+                                <div class="flashcard-answer">${card.answer}</div>
+                                <button class="flip-btn">
+                                    <i class="bi-arrow-left"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    flashcardsContainer.appendChild(flipCard);
+                    
+                    // Add flip functionality
+                    const flipBtn = flipCard.querySelector('.flip-btn');
+                    flipBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        flipCard.classList.toggle('flipped');
+                    });
+                    
+                    // Also flip on card click
+                    flipCard.addEventListener('click', () => {
+                        flipCard.classList.toggle('flipped');
+                    });
+                    
+                    // Add animation
+                    setTimeout(() => {
+                        flipCard.style.opacity = '1';
+                        flipCard.classList.add('animate-pop');
+                    }, index * 50);
+                });
+            });
+            
+            updateFlashcardsCount();
+            filterFlashcards();
+        }
+
+        function updateFlashcardsCount() {
+            const visibleCards = document.querySelectorAll('#flashcardsContainer .flip-card:not(.d-none)').length;
+            flashcardsCountBadge.textContent = visibleCards;
+        }
+
+        function updateSectionFilters() {
+            const filterContainer = document.querySelector('.section-filters');
+            if (filterContainer) filterContainer.remove();
+            
+            const filtersDiv = document.createElement('div');
+            filtersDiv.className = 'section-filters d-flex flex-wrap gap-2';
+            
+            currentSections.forEach(section => {
+                const sectionId = section.replace(/\W+/g, '-').toLowerCase();
+                
+                const div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML = `
+                    <input class="form-check-input section-filter" type="checkbox" value="${sectionId}" id="filter-${sectionId}" checked>
+                    <label class="form-check-label" for="filter-${sectionId}">${section}</label>
+                `;
+                filtersDiv.appendChild(div);
+            });
+            
+            document.querySelector('#filterAll').parentElement.after(filtersDiv);
+            
+            // Add event listeners
+            document.querySelectorAll('.section-filter').forEach(filter => {
+                filter.addEventListener('change', filterFlashcards);
+            });
+        }
+
+        function filterFlashcards() {
+            const selectedSections = Array.from(document.querySelectorAll('.section-filter:checked')).map(el => el.value);
+            
+            document.querySelectorAll('#flashcardsContainer .flip-card, #flashcardsContainer .section-header').forEach(el => {
+                const section = el.dataset.section;
+                
+                if (el.classList.contains('section-header')) {
+                    // Show section header if any of its cards are visible
+                    const hasVisibleCards = Array.from(document.querySelectorAll(`.flip-card[data-section="${section}"]`))
+                        .some(card => selectedSections.includes('all') || selectedSections.includes(section));
+                    el.classList.toggle('d-none', !hasVisibleCards);
+                } else {
+                    // Show card if it matches selected filters
+                    const showCard = selectedSections.includes('all') || selectedSections.includes(section);
+                    el.classList.toggle('d-none', !showCard);
+                }
+            });
+            
+            updateFlashcardsCount();
+        }
+
+        // Export functionality
+        document.querySelectorAll('.export-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const format = btn.dataset.format;
+                const filteredCards = Array.from(document.querySelectorAll('.flip-card:not(.d-none)')).map(item => {
+                    const question = item.querySelector('.flip-card-front .flashcard-question').textContent.trim();
+                    const answer = item.querySelector('.flip-card-back .flashcard-answer').textContent.trim();
+                    const section = item.dataset.section;
+                    return { question, answer, section };
+                });
+                
+                if (filteredCards.length === 0) {
+                    alert('No flashcards to export');
+                    return;
+                }
+                
+                let content, mimeType, extension;
+                
+                if (format === 'json') {
+                    content = JSON.stringify(filteredCards, null, 2);
+                    mimeType = 'application/json';
+                    extension = 'json';
+                } else if (format === 'csv') {
+                    content = 'Question,Answer,Section\n';
+                    filteredCards.forEach(card => {
+                        content += `"${card.question}","${card.answer}","${card.section}"\n`;
+                    });
+                    mimeType = 'text/csv';
+                    extension = 'csv';
+                } else if (format === 'anki') {
+                    content = filteredCards.map(card => 
+                        `${card.question}\t${card.answer}`
+                    ).join('\n');
+                    mimeType = 'text/plain';
+                    extension = 'txt';
+                }
+                
+                const blob = new Blob([content], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `flashcards.${extension}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        });
+    </script>
+</body>
+</html>
